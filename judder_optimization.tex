@@ -1,0 +1,479 @@
+\documentclass[11pt,a4paper]{article} 
+
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+%\usepackage{pslatex}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel} 
+\usepackage{graphicx}
+\usepackage{amsmath} 
+\setlength{\unitlength}{1mm}
+\usepackage{enumitem}
+\usepackage{cancel}
+\usepackage{amssymb} % pour les ensembles NN
+\usepackage{amsthm} % pour les théorèmes
+\usepackage{mathrsfs} % pour les hypothèses de récurrences \PP
+\usepackage{fancyhdr}
+%\usepackage{tikz,tkz-tab,tikz-3dplot,tkz-euclide}
+%\usetkzobj{all}
+%\usetikzlibrary{angles,quotes,intersections,calc,through}
+\usepackage{fancybox}
+\usepackage{titling}
+\usepackage[explicit]{titlesec}
+\usepackage{mathtools}
+\usepackage{eurosym}
+\usepackage{stmaryrd} % pour parallèle // \sslash
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+\usepackage{booktabs, multirow} % for borders and merged ranges
+\usepackage{pgfplots}
+
+\usepackage[lined,boxed,commentsnumbered, ruled,vlined,linesnumbered, english, onelanguage]{algorithm2e}
+
+\definecolor{Honeydew1}{rgb}{.94,1,.94}
+
+\newcommand{\res}{\colorbox{Honeydew1}}
+\newcommand{\resm}[1]{\colorbox{Honeydew1}{$\displaystyle #1$}}
+
+% vecteurs
+\newcommand*\colvec[3][]{
+    \begin{pmatrix}\ifx\relax#1\relax\else#1\\\fi#2\\#3\end{pmatrix}
+}
+
+\newcommand*\judderfig[3][]{
+\begin{tikzpicture}
+	\def\m{#1}
+	% b>a
+	\def\b{#3}
+    \def\a{#2}
+	\tikzstyle{grid} = [color=gray!70, thin, step=\m]
+	\tikzstyle{video} = [thick]
+	\tikzstyle{screen} = [thick]
+    \pgfmathsetmacro\amo{\a-1}
+    \pgfmathsetmacro\bmo{\b-1}
+    \pgfmathsetmacro\ab{\a*\b}
+    \pgfmathsetmacro\abmo{\a*\b-1}
+    % display timeslot grid
+    \draw[grid] (0,0) grid (\ab*\m,-3*\m);
+    % screen b refresh rates of duration a
+    \foreach \x in {0,...,\bmo}{
+       \draw[screen] (\a*\m*\x,0) rectangle node{\tiny S\x} ++(\a*\m,-\m);
+    }
+    \path (\ab*\m,0) rectangle node[right]{\tiny screen b=\b\ Hz} ++(\m,-\m);
+    % video a timeslots of duration b
+    \foreach \x in {0,...,\amo}{
+       \draw[video] (\b*\m*\x,-\m) rectangle node{\tiny V\x} ++(\b*\m,-\m);
+    }
+    \path (\ab*\m,-\m) rectangle node[right]{\tiny video a=\a\ fps} ++(\m,-\m);
+    % resulting image number from video
+    \foreach \x in {0,...,\bmo}{
+       \pgfmathsetmacro\u{int(\x*\a/\b)};
+       \draw[screen] (\a*\m*\x,-2*\m) rectangle node{\tiny \u} ++(\a*\m,-\m);
+    }
+    \path (\ab*\m,-2*\m) rectangle node[right]{\tiny video frame displayed} ++(\m,-\m);
+    \pgfmathtruncatemacro\n{int(\b/\a)+1}
+    \pgfmathtruncatemacro\k{\b-(\n-1)*\a}
+    \pgfmathtruncatemacro\kp{\a*\n-\b}
+    \pgfmathtruncatemacro\g{min(\k,\kp)}
+    \path (0,-3*\m) rectangle node{\tiny n=\n, k=\k, k'=\kp, g=\g\ glitche(s) detected} ++(\ab*\m,-\m);
+\end{tikzpicture}
+}
+
+\pagestyle{fancy}
+
+% ensembles N,Z,Q,D,R,C
+\DeclareMathOperator{\NN}{\mathbb{N}}
+\DeclareMathOperator{\ZZ}{\mathbb{Z}}
+\DeclareMathOperator{\QQ}{\mathbb{Q}}
+\DeclareMathOperator{\DD}{\mathbb{D}}
+\DeclareMathOperator{\RR}{\mathbb{R}}
+\DeclareMathOperator{\CC}{\mathbb{C}}
+\DeclareMathOperator{\e}{e}
+% droite D et plan P
+\DeclareMathOperator{\GP}{\mathscr{P}}
+\DeclareMathOperator{\GD}{\mathscr{D}}
+\DeclareMathOperator{\GA}{\mathscr{A}}
+\DeclareMathOperator{\GC}{\mathscr{C}}
+
+\DeclareMathOperator{\ggd}{ggd}
+\DeclareMathOperator{\modulo}{mod}
+\DeclareMathOperator{\intpart}{int}
+
+\newcommand*{\QEDA}{\null\nobreak\hfill\ensuremath{\blacksquare}}
+\newcommand*{\QEDB}{\null\nobreak\hfill\ensuremath{\square}}
+\newcommand{\usd}{\frac{1}{2}}
+\newcommand{\tsd}{\frac{3}{2}}
+\newcommand{\csd}{\frac{5}{2}}
+\newcommand{\usq}{\frac{1}{4}}
+\newcommand{\tsq}{\frac{3}{4}}
+\newcommand{\csq}{\frac{5}{4}}
+\newcommand{\ssq}{\frac{6}{4}}
+\newcommand{\ush}{\frac{1}{8}}
+\newcommand{\psd}{\frac{\pi}{2}}
+
+% angle deux vecteurs
+\newcommand{\angv}[2]{(\widehat{\overrightarrow{#1},\overrightarrow{#2}})}
+\newcommand{\vf}[1]{\overrightarrow{#1}}
+
+% conjugué complexe
+\newcommand{\zb}[1]{\overline{#1}}
+
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem*{cor}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newtheorem{conj}{Conjecture}[section]
+\newtheorem{exmp}{Example}[section]
+
+\theoremstyle{remark}
+\newtheorem*{rem}{Remark}
+\newtheorem*{note}{Note}
+
+\newcommand{\monNom}{Marc de Courville, Karine Gosse and Marilou de Courville}
+\newcommand{\maClasse}{}
+
+\lhead{\monNom}
+\chead{}
+\rhead{\maClasse}
+
+\lfoot{\jobname.tex}
+\cfoot{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\setlength{\droptitle}{-1.5cm}
+
+\makeatletter
+\renewcommand{\maketitle}{
+  \thispagestyle{empty}
+  \begin{center}
+  \shadowbox{\parbox{4in}{%
+     \centering%
+     \textrm{\textbf{\Large \@title}}\\
+     \vspace{0.2cm}
+     \textrm{\large \@author}\\
+     \vspace{0.2cm}
+     \textrm{\large \@date}
+  }} 
+  \end{center}
+  \null
+}
+
+\author{\monNom}
+\title{Arithmetical approach to refresh rate selection for judder effect minimization}
+\date{\today} 
+
+
+\begin{document}
+
+\maketitle
+
+\thispagestyle{fancy}
+
+\section{Introduction and problem statement}
+
+The goals of this contribution is to provide an algorithm based on integer arithmetic to select the best screen refresh rate belonging to a subset of values to minimize the judder effect for a given frame rate of the video displayed. The optimization metric used is to avoid uneven image duration displayed on the screen or maximize the number of uneven image durations so that it is not noticeable for the video watcher.
+
+The objective is to provide means to perform adaptive refresh rate based on video frame rate in video players.
+
+Note that, in this study, any specific TV motion compensation algorithm is supposed to be disabled.
+
+A mis-alignement of the frame rate with respect to the refresh rate of the screen displaying the video results in a non smooth video playback (with jerky movement) caused either by frame drops or un-even picture duration. This is referred as "judder effect". 
+
+Judder effect results from the historical fragmentation in terms of analog TV broadcasting standards (cf. \url{https://en.wikipedia.org/wiki/List_of_broadcast_video_formats}).
+
+\begin{figure}[h]
+    \centering
+    \def\svgwidth{\columnwidth}
+    \input{PAL-NTSC-SECAM.pdf_tex}
+    \caption{TV broadcasting standards used over the world}
+\end{figure}
+
+Most of the movie industry produces content in 24p (24 frames per second or fps). However in order to be viewed on the TV, content is edited and transformed to compatible fps to match old analog TV sets refresh rate.
+For instance, in France 50i is used with 50Hz refresh rate and in the US 24p content is transformed to match NTSC standard by slowing down the fps to 24000/1001.
+Possible mismatch between native refresh rate of the screen and frame rate of the video to be played results in judder.
+A way to mitigate this effect is to pick the best screen refresh rate available to minimize perceived judder effect.
+When it comes to perception everything is relative but in this contribution, an arithmetical approach to uneven frame maximization is presented when no multiple of the frame rate is available as refresh rate.
+
+\section{Notations}
+
+Let $f$ be the refresh rate (in Hertz) of the screen on which the video needs to be displayed.
+
+Let $r$ be the frame rate (in fps: frame per second) of the video to be played.
+
+Common video frame rates are: $\resm{f\in \left\{23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60\right\}}$ in fps.
+
+Typical screen refresh rates are $\resm{r\in \left\{24, 25, 30, 48, 50, 60, 90, 100, 120, 240\right\}}$ in Hz ($s^{-1}$).
+
+Note some of the frame rates or refresh rates are not integer due to legacy broadcast constraints where the following frame rates are in reality fractional:
+$\frac{24000}{1001}\approx 23.976$,
+$\frac{30000}{1001}\approx 29.970$,
+and $\frac{60000}{1001}\approx 59.940$.
+
+Thus in what follows, frame and refresh rates are considered per $1001$ seconds (by simple multiplication) in order to reduce the problem to be tackled from an integer arithmetic standpoint. Using this trick: $\resm{f'=1001\times f}$ and $\resm{r'=1001\times r}$:
+\begin{itemize}
+\item $f'\in \left\{24000, 24024, 25025, 30000, 30030, 48048, 50050, 60000, 60060\right\}$ in frame per 1001 seconds;
+\item $r'\in \left\{24024, 25025, 30030, 48048, 50050, 60060, 90090, 100100, 120120, 144144, 240240\right\}$.
+\end{itemize}
+
+In the sequel, modulo operation is denoted by $a \equiv b [c]\iff\exists k\in\ZZ / a-b=k\times c$.
+
+\section{Proposed algorithm}
+
+For a given screen resolution and video frame rate $f'$ to display, the algorithm proposed to minimize the judder effect is to select among all the available refresh rates $r'$ allowed by the display screen the one optimizing the following metrics through two steps:
+\begin{itemize}
+	\item select highest $r'$ multiple of $f'$: $r'$ matching $r' \equiv 0 [f']$;
+	\item otherwise select highest $r'>f'$ maximizing the number of uneven image durations (referred in the sequel as glitches).
+\end{itemize}
+This strategy is assumed to be the less disturbing strategy from a user perception perspective.
+
+Note that perfect decimation is not part of this algorithm i.e. selecting highest $r'$ for which  $r'$ is a multiple of $f'$ i.e. matching $f' \equiv 0 [r']$. To illustrate this choice, let's take a video at $48$ fps and a screen capable of $\{24, 30, 50, 60\}$ Hz refresh rates. There is no refresh rate matching a multiple of $48$. Selecting $24$Hz, i.e. operating a perfect factor two decimation would result in even image duration but would yield frame drops. This strategy has been tested and results in very bad viewer perception with a non smooth video viewing experience and jerky movement. For $48$fps, $60$Hz is better suited for a good viewing experience. This is the reason why such strategy is discarded.
+
+Thus judder effect can be generated either by frame drop or by uneven frame display duration.
+In the algorithm proposed, it is assumed that refresh rates higher than video frame rate exist and thus only uneven frame display duration need to be addressed.
+Uneven displayed frame duration is caused by a misalignment between the duration between two screen refresh and the video frame duration.
+The image displayed on the screen is the one sampled at the start of the refresh rate time period as illustrated in figure (\ref{fig_judder}) on which we see that the duration ratio between even and odd frames is $3:2$ (a.k.a. $3:2$ pulldown).
+
+\begin{figure}[h]
+\centering
+\def\grid{1cm}
+\judderfig[\grid]{2}{5}
+\caption{judder glitches illustration, 3:2 pulldown for $r=60=12\times 5$Hz and $f=24=12\times 2$fps}\label{fig_judder}
+\end{figure}
+
+
+\subsection{Number of glitches quantification}
+
+In order to tackle the problem from an integer arithmetic, let reduce the problem to one with a refresh rate and frame rate that are coprime (mutually prime). In order to achieve this let's compute $\gcd(r',f')$ and estimate the number of glitches with frame rate $\resm{a=f'/\gcd(r',f')}$ and refresh rate $\resm{b=r'/\gcd(r',f')}$. Based on the above definitions, $\resm{\gcd(a,b)=1}$.
+
+From now on, the following assumptions are made: $a<b$, $\gcd(a,b)=1$. 
+
+In order to carry out all the analysis, it is convenient to adopt a time resolution of $\frac{1}{a\times b}$ granularity. 
+
+With this convention, the following observations can be made:
+\begin{itemize}
+	\item during $a\times b$ time slots, the screen is refreshed $b$ times and $a$ video images are displayed;
+	\item one video frame lasts $b$ time slots;
+	\item the duration between two refreshes is of $a$ time slots
+	\item there are $a$ video image transitions, in $a\times b$ time slots of duration $\frac{1}{a\times b}$;
+	\item there are $a$ video image transitions in $b$ blocks of $a$ time slots (monitor refreshes);
+	\item the frame displayed during $k$th refresh is the $\lfloor \frac{k\times a}{b}\rfloor$th one (cf. proposition \ref{prop_disp}).
+\end{itemize}
+
+Since $\gcd(a,b)=1$, the set of remainders in the euclidian division of multiples of $a$ by $b$ spans over all integers from 0 to $b-1$, i.e. $\left\{k\times a[b],\;k\in\ZZ\right\}=\llbracket 0;b-1\rrbracket =[0;b-1]\cap \RR$ (cf. proposition \ref{prop_rem}).
+ 
+Proposition \ref{prop_block} shows that there are two repeat sequence lengths possible and the longest one (achieved first) spans over $\resm{n=\lfloor\frac{b}{a}\rfloor+1}$ time slots.
+The other repeat sequence lasts $n-1=\lfloor\frac{b}{a}\rfloor$.
+
+This uneven time block sizes creates the judder effect each of them creating a visual glitch.
+Let determine the number of perceived glitches.
+
+Only two repeat sequence duration exist: $n$ and $n-1$ covering the entire refresh time and all the video frames are displayed, that is to say:
+$$
+\left\lbrace
+	\begin{aligned}
+		k\times n+k'\times(n-1) & = b\\
+		k+k' & = a
+    \end{aligned}
+\right.
+\iff
+\resm{\left\lbrace
+	\begin{aligned}
+		k & = b-(n-1)\times a\\
+		k' & = a\times n-b
+    \end{aligned}
+\right.}
+$$
+
+The number of glitches $g$ perceived in $a\times b$ time slots are thus:
+$$\resm{g'=\min(k,k')=\min\left(b-(n-1)\times a, a\times n-b\right)}$$
+
+Denoting by $d=\gcd(1001\times r,1001\times f)$, the total number $g$ of glitches per $1001$s is thus given by:
+\begin{align*}
+	g&=d\times\min\left(\frac{1001\times r}{d}-
+	\lfloor \frac{1001\times r}{1001\times f}\rfloor\times \frac{1001\times f}{d},
+	\frac{1001\times f}{d}\times 
+	\left(\lfloor \frac{1001\times r}{1001\times f}\rfloor+1\right) - \frac{1001\times r}{d}\right)\\
+	g&=1001\times\min\left(r-\lfloor \frac{1001\times r}{1001\times f}\rfloor\times f, f\times \left(\lfloor \frac{1001\times r}{1001\times f}\rfloor+1\right)-r\right)\\
+	g&=1001\times\min\left(r-\lfloor \frac{r}{f}\rfloor\times f, f\times \left(\lfloor \frac{r}{f}\rfloor+1\right)-r\right)
+\end{align*}
+One can notice that $r-\lfloor \frac{r}{f}\rfloor f=\modulo(r,f)= r\% f$ i.e. the remainder in the division of $r$ by $f$ which yields that the number of glitches per $1001$ seconds finally is given by:
+\begin{align*}
+\resm{g}&=\resm{1001\times \min\left(\modulo(r,f), f-\modulo(r,f)\right)}\\
+\resm{g}&=\resm{\min\left(\modulo(r',f'), f'-\modulo(r',f')\right)}\\
+\end{align*}
+
+
+\subsubsection{Resulting proposed algorithm}
+
+Let assume that when there is no refresh rate multiple of the frame rate that the best strategy from a viewer perception standpoint is to maximize the number of glitches per second so that they are evenly distributed. This correspond in trying to avoid isolated glitches that would be more noticeable by the viewer.
+
+The above computations can be summarized in the following proposed algorithm to minimize the judder perceived effects:
+
+\begin{center}
+%\begin{minipage}{0.9\linewidth}
+\SetCustomAlgoRuledWidth{14cm}
+\begin{algorithm}[H]
+\SetAlgoLined
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output}
+\Input{$f$ frame rate, $r[]$ array of possible refresh rates}
+\Output{refresh rate}
+\BlankLine
+$f' \leftarrow 1001\times f$\;
+$r'[] \leftarrow 1001\times r[]$\;
+$r'_o \leftarrow 0$\;
+$g_o \leftarrow 0$\;
+\For{$r'$ in $r'[]$}
+{
+\If{$\modulo(r',f')=0$}{
+\If{$r'>r'_o$}{
+$r'_o \leftarrow r'$\;
+}
+}
+}
+\If{$r'_o\neq 0$}{\Return{$r'_o/1001$}}
+\For{$r'$ in $r[]$}
+{
+\If{$r'>f'$}{
+%$d \leftarrow \gcd($f'$,$r'$)$\;
+%$a \leftarrow f'/d$\;
+%$b \leftarrow r'/d$\;
+%$n \leftarrow \intpart(b/a)+1$\;
+%$k \leftarrow b-(n-1)\times a$\;
+%$k' \leftarrow a\times n-b$\;
+%$g \leftarrow d\times \min(k,k')$\;
+$k \leftarrow \modulo(r',f')$\;
+$k' \leftarrow f'-k$\;
+$g \leftarrow \min(k,k')$\;
+\If{$g>g_o$}{
+$g_o \leftarrow g$\;
+$r'_o \leftarrow r'$\;
+}
+}
+}
+\Return{$r'_o/1001$}
+\caption{Determine best refresh rate to select to minimize judder effect}
+\end{algorithm}
+%\end{minipage}
+\end{center}
+
+\subsection{Annexe: proofs}
+
+This subsection provides some proofs of the statements used in the document.
+
+In the series of euclidian division of $k\times a$ by $b$, $k\in \NN$, let's denote by $(q_k)_{k\in\NN}$ and $(r_k)_{k\in\NN}$ the corresponding series of quotient and remainders:
+\begin{align*}
+	k\times a &= q_k\times b + r_k,\; q_k\in \NN\text{ and }0\leq r_k<b\\
+	q_{k+1}&=q_k\text{ if }r_k< b-a
+\end{align*}
+
+\begin{prop}
+In the series of remainders of the euclidian divisions of $k\times a$ by $b$, $k\in \NN$: all the remainders are reached.
+\end{prop}\label{prop_rem}
+\begin{proof}
+$(r_k)_{k\in\NN}$ is periodic of period $b$ since $b|(a\times b)$, $b\times a=q_b\times b +0$. Now let prove by contradiction that for $0\leq k<k'<b$ $r_k\neq r_{k'}$.
+Assume that $(k, k')$ can be found such as $0\leq k<k'<b$ and $r_k=r_{k'}$. This means that:
+\begin{align}
+k\times a  &= q_k\times b+r_k\nonumber\\
+k'\times a  &= q_{k'}\times b+r_k\nonumber\\
+\implies (k'-k)\times a&=(q_{k'}-q_k)\times b\label{eq_ab}
+\end{align}
+Since $\gcd(a,b)=1$, applying Gauss theorem to equation (\ref{eq_ab}) shows that $b|(k'-k)$. But $0\leq k<k'<b$ means that $0<k'-k<b$ and the only possibility is that $k'-k=0$ which is in contradiction with the hypothesis.
+Hence, $Card\left(\left\{r_k,\;k\in \llbracket 0;b-1\rrbracket\right\}\right)=b$, which shows that all possible remainders in the division of $k\times a$ by $b$ are reached. 
+\end{proof}
+
+\begin{prop}
+The quotient of the euclidian division of $k\times a$ by $b$ is the frame picture displayed during the $k$th screen refresh.
+\end{prop}\label{prop_disp}
+\begin{proof}
+The image displayed at the $k$th screen refresh period lasting $a$ time slots is sampled at $t_k=k\times a$ blocks of $\lfloor\frac{b}{a}\rfloor$ seconds.
+Each video image is displayed during $b$ blocks of $\lfloor\frac{b}{a}\rfloor$ seconds. It means that the video frame number displayed during the $k$th screen refresh is $\lfloor\frac{k\times a}{b}\rfloor$.
+\end{proof}
+
+\begin{prop}
+In the succession of the image displayed on the screen, there are only two durations possible: $\lfloor\frac{b}{a}\rfloor$ and $\lfloor\frac{b}{a}\rfloor+1$ in terms of number of time slots lasting $\frac{1}{a\times b}$ seconds each.
+\end{prop}\label{prop_block}
+
+\begin{proof}
+Let assume that at $t=0$, the screen top of page refresh and the start of the video frame are aligned. 
+Let divide the time line in time slots of duration $\frac{1}{a\times b}$ which consists in the time granularity used to define block sizes.
+Denote respectively by $(q,r)\in\NN^2$ the quotient $q$ and remainder $r$ in the euclidian division of $b$ by $a$, i.e. $b=q\times a+r$ where, $0\leq r<a$ and $q=\lfloor\frac{b}{a}\rfloor$.
+
+It is thus clear that the smaller number of size $a$ blocks, until a size $b$ block boundary is crossed is $\lfloor\frac{b}{a}\rfloor+1$.
+The time overlap on the next size $b$ block is thus $0<a-r\leq a$.
+
+This analysis is valid at each block i.e. that the possible overlap with next block when stacking size $a$ blocks is smaller or equal to $a$.
+
+Based on this analysis, only two image durations (i.e. longest stacking of $a$ blocks before overlapping the next $b$ size block) are possible: $q=\lfloor\frac{b}{a}\rfloor$ or $q+1=\lfloor\frac{b}{a}\rfloor+1$.
+\end{proof}
+
+\section{Annexe: some common glitches analysis}
+
+The following glitches analysis are representing real cases:
+\begin{itemize}
+	\item $f=48=12\times 4$fps and $r=60=12\times 5$Hz: 12 glitches every second;
+	\item $f=24=6\times 4$fps and $r=30=6\times 5$Hz: 6 glitches every second;
+	\item $f=24=12\times 2$fps and $r=30=12\times 5$Hz: 12 glitches every second;
+	\item $f=25=5\times 5$fps and $r=60=5\times 12$Hz: 10 glitch every second;
+\end{itemize}
+
+These specific refresh/frame rates are illustrated figure (\ref{fig_glitches}) and a more comprehensible table is provided table \ref{tab_glitches} covering a larger number of common refresh/frame rates.
+
+\begin{figure}[h]
+\centering
+\def\grid{0.40cm}
+\judderfig[\grid]{2}{5}
+\judderfig[\grid]{4}{5}
+\judderfig[0.20cm]{5}{12}
+\caption{judder glitches quantifications (figures generated automatically)}\label{fig_glitches}
+\end{figure}
+
+%https://www.tablesgenerator.com/
+\begin{table}[]
+\centering
+\begin{tabular}{|r|r||r|r|r|r|r|r|r|r|r|}
+\hline\hline
+\multicolumn{2}{|c||}{\multirow{2}{*}{($1001\times$)Hz/fps}} & 23.976 & 24 & 25 & 29.97 & 30 & 48 & 50 & 59.94 & 60 \\
+\multicolumn{2}{|c||}{} & 24000 & 24024 & 25025 & 30000 & 30030 & 48048 & 50050 & 60000 & 60060 \\
+\hline\hline
+24 & 24024 & 24 &  &  &  &  &  &  &  &  \\
+\hline
+25 & 25025 & 1,025 & 1,001 &  &  &  &  &  &  &  \\
+\hline
+30 & 30030 & 6,030 & 6,006 & 5,005 & 30 &  &  &  &  &  \\
+\hline
+48 & 48048 & 48 & 0 & 2,002 & 11,952 & 12,012 &  &  &  &  \\
+\hline
+50 & 50050 & 2,050 & 2,002 & 0 & 9,950 & 10,010 & 2,002 &  &  &  \\
+\hline
+60 & 60060 & 11,940 & 12,012 & 10,010 & 60 & 0 & 12,012 & 10,010 & 60 &  \\
+\hline
+90 & 90090 & 5,910 & 6,006 & 10,010 & 90 & 0 & 6,006 & 10,010 & 29,910 & 30,030 \\
+\hline
+100 & 100100 & 4,100 & 4,004 & 0 & 10,100 & 10,010 & 4,004 & 0 & 19,900 & 20,020 \\
+\hline
+120 & 120120 & 120 & 0 & 5,005 & 120 & 0 & 24,024 & 20,020 & 120 & 0 \\
+\hline
+144 & 144144 & 144 & 0 & 6,006 & 5,856 & 6,006 & 0 & 6,006 & 24,144 & 24,024 \\
+\hline
+240 & 240240 & 240 & 0 & 10,010 & 240 & 0 & 0 & 10,010 & 240 & 0\\
+\hline
+\hline
+\end{tabular}
+\caption{number of glitches per 1001 seconds}\label{tab_glitches}
+\end{table}
+
+\end{document}
