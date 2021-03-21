@@ -337,7 +337,7 @@ $g_o \leftarrow 0$\;
 \For{$r'$ in $r'[]$}
 {
 \If{$\modulo(r',f')=0$}{
-\If{$r'>r'_o$}{
+\If{$r'>=r'_o$}{
 $r'_o \leftarrow r'$\;
 }
 }
@@ -345,7 +345,7 @@ $r'_o \leftarrow r'$\;
 \If{$r'_o\neq 0$}{\Return{$r'_o/1001$}}
 \For{$r'$ in $r[]$}
 {
-\If{$r'>f'$}{
+\If{$r'>=f'$}{
 %$d \leftarrow \gcd($f'$,$r'$)$\;
 %$a \leftarrow f'/d$\;
 %$b \leftarrow r'/d$\;
