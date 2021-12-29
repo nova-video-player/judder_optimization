@@ -237,6 +237,8 @@ For a given screen resolution and video frame rate $f'$ to display, the algorith
 \end{itemize}
 This strategy is assumed to be the less disturbing strategy from a user perception perspective.
 
+Selecting the highest $r'$ has the merit of allowing a maximum screen refresh rate granting the best performance in terms of fluidity of the UI elements on top of the playing video. However, to achieve this rate, frame repetition is used for the video plane which can interfere with motion compensation algorithm of the TV. It is thus recommended to disable any motion compensation algorithm on the TV for best viewing experience.
+
 Note that perfect decimation is not part of this algorithm i.e. selecting highest $r'$ for which  $r'$ is a multiple of $f'$ i.e. matching $f' \equiv 0 [r']$. To illustrate this choice, let's take a video at $48$ fps and a screen capable of $\{24, 30, 50, 60\}$ Hz refresh rates. There is no refresh rate matching a multiple of $48$. Selecting $24$Hz, i.e. operating a perfect factor two decimation would result in even image duration but would yield frame drops. This strategy has been tested and results in very bad viewer perception with a non smooth video viewing experience and jerky movement. For $48$fps, $60$Hz is better suited for a good viewing experience. This is the reason why such strategy is discarded.
 
 Thus judder effect can be generated either by frame drop or by uneven frame display duration.
